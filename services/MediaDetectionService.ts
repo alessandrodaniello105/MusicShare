@@ -18,7 +18,25 @@ class MediaDetectionServiceClass {
       console.log('Opening notification access settings...');
       await Linking.openSettings();
       console.log('Please enable notification access for Music Share in the settings');
-      return true;
+      
+      // Wait for user to enable notification access
+      return new Promise((resolve) => {
+        const checkAccess = async () => {
+          try {
+            const isEnabled = await NativeModules.MediaDetectionModule.isNotificationServiceEnabled();
+            console.log('Notification service enabled:', isEnabled);
+            if (isEnabled) {
+              resolve(true);
+            } else {
+              setTimeout(checkAccess, 1000); // Check again after 1 second
+            }
+          } catch (error) {
+            console.error('Error checking notification access:', error);
+            resolve(false);
+          }
+        };
+        checkAccess();
+      });
     } catch (error) {
       console.error('Failed to open notification settings:', error);
       return false;
@@ -41,12 +59,14 @@ class MediaDetectionServiceClass {
         ];
 
         const results = await Promise.all(
-          permissions.map(permission => 
-            PermissionsAndroid.request(permission)
-          )
+          permissions.map(async permission => {
+            const result = await PermissionsAndroid.request(permission);
+            console.log(`Permission ${permission} result:`, result);
+            return result;
+          })
         );
 
-        console.log('Permission results:', results);
+        console.log('All permission results:', results);
 
         const allGranted = results.every(
           result => result === PermissionsAndroid.RESULTS.GRANTED
@@ -57,12 +77,18 @@ class MediaDetectionServiceClass {
           throw new Error('Required permissions not granted');
         }
 
-        console.log('All permissions granted, requesting notification access...');
-        // Request notification access
-        const notificationAccessGranted = await this.requestNotificationAccess();
-        if (!notificationAccessGranted) {
-          console.error('Notification access not granted');
-          throw new Error('Notification access not granted');
+        console.log('All permissions granted, checking notification access...');
+        // Check if notification access is already enabled
+        const isEnabled = await NativeModules.MediaDetectionModule.isNotificationServiceEnabled();
+        console.log('Notification service already enabled:', isEnabled);
+
+        if (!isEnabled) {
+          console.log('Requesting notification access...');
+          const notificationAccessGranted = await this.requestNotificationAccess();
+          if (!notificationAccessGranted) {
+            console.error('Notification access not granted');
+            throw new Error('Notification access not granted');
+          }
         }
 
         console.log('Setting up event listeners...');
