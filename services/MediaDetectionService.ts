@@ -1,4 +1,4 @@
-import { Platform, NativeEventEmitter, NativeModules, PermissionsAndroid, Linking } from 'react-native';
+import { Platform, NativeEventEmitter, NativeModules, PermissionsAndroid, Linking, Alert } from 'react-native';
 
 interface Track {
   title: string;
@@ -12,6 +12,19 @@ class MediaDetectionServiceClass {
   private callback: TrackCallback | null = null;
   private isMonitoring: boolean = false;
   private eventEmitter: NativeEventEmitter | null = null;
+
+  private async openAppSettings() {
+    try {
+      await Linking.openSettings();
+      Alert.alert(
+        'Permission Required',
+        'Please enable all required permissions in the settings and return to the app.',
+        [{ text: 'OK' }]
+      );
+    } catch (error) {
+      console.error('Failed to open settings:', error);
+    }
+  }
 
   private async requestNotificationAccess(): Promise<boolean> {
     try {
@@ -28,6 +41,7 @@ class MediaDetectionServiceClass {
             if (isEnabled) {
               resolve(true);
             } else {
+              console.log('Notification access not yet granted, checking again in 1 second...');
               setTimeout(checkAccess, 1000); // Check again after 1 second
             }
           } catch (error) {
@@ -58,23 +72,68 @@ class MediaDetectionServiceClass {
           PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
         ];
 
-        const results = await Promise.all(
+        console.log('Checking existing permissions...');
+        const existingPermissions = await Promise.all(
           permissions.map(async permission => {
-            const result = await PermissionsAndroid.request(permission);
-            console.log(`Permission ${permission} result:`, result);
+            const result = await PermissionsAndroid.check(permission);
+            console.log(`Permission ${permission} already granted:`, result);
             return result;
           })
         );
 
-        console.log('All permission results:', results);
-
-        const allGranted = results.every(
-          result => result === PermissionsAndroid.RESULTS.GRANTED
-        );
+        const allGranted = existingPermissions.every(granted => granted);
+        console.log('All permissions already granted:', allGranted);
 
         if (!allGranted) {
-          console.error('Not all permissions were granted');
-          throw new Error('Required permissions not granted');
+          console.log('Requesting missing permissions...');
+          const results = await Promise.all(
+            permissions.map(async permission => {
+              const result = await PermissionsAndroid.request(permission);
+              console.log(`Permission ${permission} result:`, result);
+              return result;
+            })
+          );
+
+          console.log('All permission results:', results);
+
+          // Check if any permission was permanently denied
+          const hasPermanentDenial = results.some(
+            result => result === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN
+          );
+
+          if (hasPermanentDenial) {
+            console.log('Some permissions were permanently denied, opening settings...');
+            Alert.alert(
+              'Permissions Required',
+              'Some permissions are required for the app to work. Please enable them in settings.',
+              [
+                {
+                  text: 'Open Settings',
+                  onPress: () => this.openAppSettings()
+                },
+                {
+                  text: 'Cancel',
+                  style: 'cancel',
+                  onPress: () => {
+                    console.log('User cancelled permission request');
+                    if (this.callback) {
+                      this.callback(null);
+                    }
+                  }
+                }
+              ]
+            );
+            return;
+          }
+
+          const allGranted = results.every(
+            result => result === PermissionsAndroid.RESULTS.GRANTED
+          );
+
+          if (!allGranted) {
+            console.error('Not all permissions were granted');
+            throw new Error('Required permissions not granted');
+          }
         }
 
         console.log('All permissions granted, checking notification access...');
