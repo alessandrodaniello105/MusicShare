@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- App Information -->
+    <key>CFBundleDevelopmentRegion</key>
+    <string>en</string>
+    <key>CFBundleDisplayName</key>
+    <string>Music Share</string>
+    <key>CFBundleExecutable</key>
+    <string>$(EXECUTABLE_NAME)</string>
+    <key>CFBundleIdentifier</key>
+    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleName</key>
+    <string>$(PRODUCT_NAME)</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0.0</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    
+    <!-- URL Schemes for deep linking and share extension -->
+    <key>CFBundleURLTypes</key>
+    <array>
+        <!-- Custom URL scheme -->
+        <dict>
+            <key>CFBundleURLName</key>
+            <string>com.musicshare.app</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>musicshare</string>
+            </array>
+        </dict>
+        
+        <!-- Tidal URL handling -->
+        <dict>
+            <key>CFBundleURLName</key>
+            <string>tidal-handler</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>tidal</string>
+            </array>
+        </dict>
+        
+        <!-- HTTPS URL handling for music services -->
+        <dict>
+            <key>CFBundleURLName</key>
+            <string>https-handler</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>https</string>
+            </array>
+        </dict>
+    </array>
+    
+    <!-- Associated Domains for universal links -->
+    <key>com.apple.developer.associated-domains</key>
+    <array>
+        <string>applinks:tidal.com</string>
+        <string>applinks:listen.tidal.com</string>
+    </array>
+    
+    <!-- Privacy Usage Descriptions -->
+    <key>NSMicrophoneUsageDescription</key>
+    <string>This app needs access to microphone to detect currently playing music.</string>
+    <key>NSAppleMusicUsageDescription</key>
+    <string>This app needs access to Apple Music to detect currently playing songs and share them on YouTube.</string>
+    <key>NSMediaLibraryUsageDescription</key>
+    <string>This app needs access to your media library to detect currently playing music.</string>
+    
+    <!-- Background Modes for media detection -->
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>audio</string>
+        <string>background-processing</string>
+        <string>background-fetch</string>
+    </array>
+    
+    <!-- Media Player Framework -->
+    <key>NSSupportsLiveActivities</key>
+    <true/>
+    
+    <!-- Share Extension Support -->
+    <key>NSExtension</key>
+    <dict>
+        <key>NSExtensionAttributes</key>
+        <dict>
+            <key>NSExtensionActivationRule</key>
+            <dict>
+                <!-- Accept text content (URLs, song info) -->
+                <key>NSExtensionActivationSupportsText</key>
+                <true/>
+                <!-- Accept web URLs -->
+                <key>NSExtensionActivationSupportsWebURLWithMaxCount</key>
+                <integer>1</integer>
+                <!-- Accept file URLs -->
+                <key>NSExtensionActivationSupportsFileWithMaxCount</key>
+                <integer>1</integer>
+            </dict>
+        </dict>
+        <key>NSExtensionMainStoryboard</key>
+        <string>MainInterface</string>
+        <key>NSExtensionPointIdentifier</key>
+        <string>com.apple.share-services</string>
+    </dict>
+    
+    <!-- App Transport Security -->
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsArbitraryLoads</key>
+        <true/>
+        <key>NSExceptionDomains</key>
+        <dict>
+            <key>youtube.com</key>
+            <dict>
+                <key>NSExceptionAllowsInsecureHTTPLoads</key>
+                <true/>
+                <key>NSExceptionMinimumTLSVersion</key>
+                <string>TLSv1.0</string>
+            </dict>
+            <key>googleapis.com</key>
+            <dict>
+                <key>NSExceptionAllowsInsecureHTTPLoads</key>
+                <true/>
+                <key>NSExceptionMinimumTLSVersion</key>
+                <string>TLSv1.0</string>
+            </dict>
+            <key>tidal.com</key>
+            <dict>
+                <key>NSExceptionAllowsInsecureHTTPLoads</key>
+                <true/>
+                <key>NSExceptionMinimumTLSVersion</key>
+                <string>TLSv1.0</string>
+            </dict>
+        </dict>
+    </dict>
+    
+    <!-- Required device capabilities -->
+    <key>UIRequiredDeviceCapabilities</key>
+    <array>
+        <string>armv7</string>
+    </array>
+    
+    <!-- Supported interface orientations -->
+    <key>UISupportedInterfaceOrientations</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationPortraitUpsideDown</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+    
+    <!-- iPad specific orientations -->
+    <key>UISupportedInterfaceOrientations~ipad</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationPortraitUpsideDown</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+    
+    <!-- Launch screen -->
+    <key>UILaunchStoryboardName</key>
+    <string>LaunchScreen</string>
+    
+    <!-- Status bar style -->
+    <key>UIStatusBarStyle</key>
+    <string>UIStatusBarStyleDefault</string>
+    <key>UIViewControllerBasedStatusBarAppearance</key>
+    <false/>
+    
+    <!-- Queries for detecting installed apps -->
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+        <!-- WhatsApp -->
+        <string>whatsapp</string>
+        <string>whatsapp-business</string>
+        
+        <!-- Telegram -->
+        <string>tg</string>
+        <string>telegram</string>
+        
+        <!-- Tidal -->
+        <string>tidal</string>
+        
+        <!-- Other music apps -->
+        <string>spotify</string>
+        <string>music</string>
+        <string>deezer</string>
+        
+        <!-- Social sharing -->
+        <string>fb</string>
+        <string>twitter</string>
+        <string>instagram</string>
+    </array>
+</dict>
+</plist>
